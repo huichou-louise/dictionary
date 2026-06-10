@@ -79,15 +79,10 @@ function createUI() {
                         <!-- 定義區塊 -->
                         <div style="margin-bottom: 15px;">
                             ${d.definitions.map((def, index) => `<div style="margin-bottom: 5px;">${index + 1}. ${def}</div>`).join('')}
+                            
                         </div>
 
-                        <!-- 用法區塊 -->
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #2980b9;">${d.usage_title}</strong>
-                            <div style="white-space: pre-line; padding-left: 10px; margin-top: 5px;">
-                                ${d.usages.join('<br>')}
-                            </div>
-                        </div>
+                        
 
                         <!-- 例句區塊 -->
                         <div>

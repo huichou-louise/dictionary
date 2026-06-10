@@ -10,7 +10,7 @@ chrome.action.onClicked.addListener((tab) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "callGemini") {
         const { vocab, key } = request;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
 
         fetch(url, {
             method: "POST",
@@ -23,8 +23,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 請將內容依照下列結構組織：
 
                                 {
-                                "header": "單字 （詞性簡寫）",
-                                "definitions": ["定義1\n→常見用法", "定義2\n→常見用法"],
+                                "header": "單字，若為動詞請顯示原型 （詞性簡寫）",
+                                "definitions": ["中文翻譯\n→ 常見用法詞組"],
                                 "usage_title": "🗒️用法",
                                 "usages": ["條列用法描述與相關詞清單"],
                                 "example_title": "🔹例句",
