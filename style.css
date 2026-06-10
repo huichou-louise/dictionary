@@ -1,0 +1,11 @@
+#my-floating-box {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2147483647;
+    background: #fff;
+    padding: 15px;
+    border: 2px solid #333;
+    border-radius: 8px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
