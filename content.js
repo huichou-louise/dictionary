@@ -1,4 +1,4 @@
-// 1. 建立並注入視窗
+// 1. 建立並注入視窗0
 const box = document.createElement('div');
 box.id = 'my-floating-box';
 box.innerHTML = `
@@ -12,16 +12,9 @@ box.innerHTML = `
 `;
 document.body.appendChild(box);
 // 加入關閉功能(關鍵步驟)
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "toggle") {
-        const box = document.getElementById('my-floating-box');
-        if (box) {
-            box.remove(); // 如果存在就刪除
-        } else {
-            // 如果不存在，重新呼叫建立視窗的函數
-            createDictWindow();
-        }
-    }
+document.getElementById('closeBtn').addEventListener('click', () => {
+    // 從網頁中完全移除這個 DOM 元素
+    box.remove();
 });
 
 
