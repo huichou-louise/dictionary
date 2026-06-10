@@ -1,7 +1,19 @@
 {
     "manifest_version": 3,
-    "name": "Floating Input Box",
+    "name": "Floating Dictionary",
     "version": "1.0",
+    "description": "一個可以固定在螢幕上的浮動字典視窗",
+    "permissions": [
+        "scripting",
+        "storage"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "action": {
+        "default_title": "開啟/關閉字典"
+    },
     "content_scripts": [
         {
             "matches": [
