@@ -10,9 +10,9 @@ chrome.action.onClicked.addListener((tab) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "callGemini") {
         const { vocab, key } = request;
-
+        const model_name = 'gemini-2.5-flash-lite';
         // 💡 建議將模型名稱改為官方穩定版核心模型 gemini-2.5-flash 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model_name}:generateContent?key=${key}`;
 
         fetch(url, {
             method: "POST",
@@ -23,8 +23,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         text: `請查詢法文單字：${vocab}。並嚴格依照規定的 JSON 格式組織內容。
                         結構範例：
                         {
-                          "header": "單字原型 (詞性)",
-                          "definitions": ["中文翻譯 - 常見用法"],
+                          "header": "單字原型",
+                          "speech": "(詞性簡寫)",
+                          "definitions": ["【中文翻譯】 常見用法"],
                           "usage_title": "🗒️用法",
                           "usages": ["相關用法或詞清單描述"],
                           "example_title": "🔹例句",
