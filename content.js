@@ -47,6 +47,7 @@ function createUI() {
     const searchBtn = document.getElementById('searchBtn');
     const closeBtn = document.getElementById('closeBtn');
     const resultArea = document.getElementById('resultArea');
+    
     // let mockResult = null;
     let aiResult = null;
     closeBtn.addEventListener('click', () => box.remove());
@@ -212,6 +213,7 @@ function createUI() {
                 html += `
                     <div style="margin-top: 20px; display: flex; gap: 10px;">
                         <button id="exportCsvBtn" style="flex: 1; padding: 10px;">下載 CSV</button>
+                        <button id="ankiCsvBtn" style="flex: 1; padding: 10px;">CSV for Anki</button>
                         <button id="closeModalBtn" style="flex: 1; padding: 10px;">關閉</button>
                     </div>
                 `;
@@ -232,6 +234,7 @@ function createUI() {
                 // 綁定其他按鈕事件
                 document.getElementById('closeModalBtn').onclick = () => overlay.remove();
                 document.getElementById('exportCsvBtn').onclick = exportToCSV;
+                document.getElementById('ankiCsvBtn').onclick = exportToAnki;
             });
         }
 
@@ -242,6 +245,7 @@ function createUI() {
     // 綁定按鈕
     document.getElementById('viewFavBtn').addEventListener('click', () => {
         openFavoritesModal();
+        
     });
 
 
@@ -280,6 +284,52 @@ function exportToCSV() {
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = "french_vocabulary.csv";
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+}
+
+// anki
+function exportToAnki() {
+    chrome.storage.local.get(['favorites'], (res) => {
+        const data = res.favorites || [];
+        const today = new Date().toISOString().split('T')[0];
+        // const data = res.favorites || [];
+        if (data.length === 0) return alert("沒有收藏資料可供下載");
+
+        // 1. 加入 BOM (EF BB BF) 確保 Excel 能識別 UTF-8 編碼
+        let csvContent = "\uFEFF";
+
+        // 2. 設定 CSV 標題欄
+        // csvContent += "單字,詞性,定義,用法說明,例句\n";
+
+        // 3. 逐筆處理資料
+        data.forEach(item => {
+            // 輔助函式：處理字串，將雙引號轉義並以雙引號包覆
+            const escapeCSV = (str) => `"${(str || "").toString().replace(/"/g, '""')}"`;
+
+            // 對應你的新結構欄位
+            const header = escapeCSV(item.header || "");
+            const speech = escapeCSV(item.speech || ""); // 新增：對應結構中的 speech
+            const definitions = escapeCSV((item.definitions || []).join('; '));
+            const usages = escapeCSV((item.usages || []).join('; '));
+            const examples = escapeCSV((item.examples || []).join('; '));
+            // 寫入 CSV 前的欄位清理邏輯
+            const clean = (str) => String(str).replace(/"/g, '""'); // 將內部的 " 變為 "" 以符合 CSV 標準
+
+            csvContent += `${clean(header)} ${clean(speech)}\t${clean(definitions)} <br> ${clean(usages)} <br> ${clean(examples)}\t${today}\n`;
+
+            // 寫入 CSV 行
+            // csvContent += `${header} ${speech} \t ${definitions}${usages}${examples} \t ${today}\n`;
+        });
+
+        // 4. 建立並下載檔案
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `french_vocab_anki_${today}.csv`;
         link.style.display = "none";
         document.body.appendChild(link);
         link.click();
