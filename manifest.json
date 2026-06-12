@@ -3,6 +3,24 @@
     "name": "Floating Dictionary",
     "version": "1.0",
     "description": "一個可以固定在螢幕上的浮動字典視窗",
+    // 這裡宣告圖片路徑
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "assets/exit.png",
+                "assets/arrow.png",
+                "assets/search.png",
+                "assets/btIcon_check.png",
+                "assets/btIcon_folder.png",
+                "assets/btIcon_heart.png",
+                "assets/delete.png",
+                "assets/btIcon_download.png"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
     "permissions": [
         "scripting",
         "storage"

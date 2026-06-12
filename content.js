@@ -19,24 +19,49 @@ function createUI() {
     const box = document.createElement('div');
     box.id = 'my-floating-box';
     // -- 加上簡單的樣式，確保視窗浮動在頁面上
-    box.style.cssText = "position: fixed; top: 20px; right: 20px; z-index: 10000; background: white; padding: 15px; border: 1px solid #ccc; width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);";
+    const exitIconUrl = chrome.runtime.getURL('assets/exit.png');
+    const arrowIconUrl = chrome.runtime.getURL('assets/arrow.png');
+    const searchIconUrl = chrome.runtime.getURL('assets/search.png');
+    const checkIconUrl = chrome.runtime.getURL('assets/btIcon_check.png.png');
+    const folderIconUrl = chrome.runtime.getURL('assets/btIcon_folder.png');
+    const heartIconUrl = chrome.runtime.getURL('assets/btIcon_heart.png');
+    const deleteIconUrl = chrome.runtime.getURL('assets/delete.png');
+    const downloadIconUrl = chrome.runtime.getURL('assets/btIcon_download.png');
 
     box.innerHTML = `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <strong>字典查詢</strong>
-            <button id="closeBtn">X</button>
+        <div class="tit">
+            <strong>Dictionary</strong>
+            <button id="closeBtn">
+                <img src="${exitIconUrl}" alt="exit">
+            </button>
         </div>
-        <input type="text" id="apiKeyInput" placeholder="api key">
-        <input type="submit" id="apiKeyBtn" value="V">
-        <hr>
-        <input type="text" id="vocabInput" placeholder="請選取單字...">
-        <input type="submit" id="searchBtn" value="Search">
-        <div id="resultArea" style="margin:15px 0px; padding:10px; border:1px solid #ddd; max-height: 200px; overflow-y: auto; background: #f9f9f9; font-size: 13px;">
+        <div class="input-group">
+            <input type="text" id="apiKeyInput" placeholder="api key">
+            <button id="apiKeyBtn">
+                <img src="${arrowIconUrl}" alt="send api key">
+            </button>
+        </div>
+        <div class="input-group">
+            <input type="text" id="vocabInput" placeholder="Select the word...">
+            <button id="searchBtn">
+                <img src="${searchIconUrl}" alt="Search">
+            </button>
+        </div>
+        <div id="resultArea">
             還沒有東東...
         </div>
-        <button id="saveBtn" style="padding: 5px 10px; cursor: pointer;">❤️ 收藏</button>
-        <button id="viewFavBtn" style="padding: 5px 10px; cursor: pointer;">📁 查看收藏</button>
-        <button id="clearFavBtn" style="padding: 5px 10px; cursor: pointer;">清除收藏</button>
+        <div class="btn-group">
+            <button class="saveBtn" id="saveBtn">
+                Save
+                <img src="${heartIconUrl}" alt="save">
+            </button>
+            <button class="saveBtn viewFavBtn" id="viewFavBtn">
+                List
+                <img src="${folderIconUrl}" alt="list">
+            </button>
+        </div>
+        
+        
     `;
     document.body.appendChild(box);
     const saveBtn = document.getElementById('saveBtn');
@@ -47,7 +72,7 @@ function createUI() {
     const searchBtn = document.getElementById('searchBtn');
     const closeBtn = document.getElementById('closeBtn');
     const resultArea = document.getElementById('resultArea');
-    
+    const viewFavBtn = document.getElementById('viewFavBtn');
     // let mockResult = null;
     let aiResult = null;
     closeBtn.addEventListener('click', () => box.remove());
@@ -65,7 +90,8 @@ function createUI() {
     // 搜尋功能
     const searchVocab = () => {
         const vocab = vocabInput.value.trim();
-        saveBtn.textContent = '❤️ 收藏';
+        saveBtn.innerHTML = `Save <img src="${heartIconUrl}" alt="save" style="opacity: 1;">`;
+
 
         // 測試用的模擬資料
         // mockResult = {
@@ -118,8 +144,7 @@ function createUI() {
                         <div style="font-family: sans-serif; line-height: 1.6; color: #333; text-align: left;">
                         <!-- 翻譯區塊 -->
                         <div style="margin-bottom: 15px; white-space: pre-line;">
-                            <strong style="color: #d35400;">${aiResult.header}</strong>
-                            <div style="color: #d35400;">${aiResult.speech}</div>
+                            <strong style="color: #d35400;">${aiResult.header}   ${aiResult.speech}</strong>
                         </div>
 
                         <!-- 定義區塊 -->
@@ -156,65 +181,62 @@ function createUI() {
         const sel = window.getSelection().toString().trim();
         if (sel) vocabInput.value = sel;
     });
-    // 收藏功能的邏輯
-    saveBtn.addEventListener('click', () => {
-        // saveBtn.textContent = '已收藏';
-        chrome.storage.local.get(['favorites'], (res) => {
-            let favs = res.favorites || [];
-            // 檢查是否已存在 (避免重複)
-            if (!favs.find(item => item.header === aiResult.header)) {
-                favs.push(aiResult);
-                chrome.storage.local.set({ favorites: favs }, () => {
-                    saveBtn.textContent = '已收藏';
-                });
-                console.log('目前的收藏清單:', favs);
-            } else {
-                alert("此單字已收藏過。");
-            }
-        });
-    });
-    // 清除收藏
-    clearFavBtn.addEventListener('click', () => {
-        chrome.storage.local.remove(['favorites'], () => {
-            console.log("收藏清單已移除");
-        });
-    })
 
-    // 打開彈窗查看收藏單字
+
+    // 彈窗查收藏單字
     function openFavoritesModal() {
         // 建立遮罩與容器 (同前)
         const overlay = document.createElement('div');
         overlay.id = 'fav-modal-overlay';
-        overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999999; display: flex; justify-content: center; align-items: center;`;
+        // overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999999; display: flex; justify-content: center; align-items: center;`;
 
         const container = document.createElement('div');
-        container.style.cssText = `background: white; padding: 20px; border-radius: 10px; width: 400px; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2);`;
+        container.id = 'containar'
+        // container.style.cssText = `background: white; padding: 20px; border-radius: 10px; width: 400px; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2);`;
 
         // 渲染函式 (將其抽出，方便刪除後重新呼叫)
         function renderList() {
             chrome.storage.local.get(['favorites'], (res) => {
                 const favs = res.favorites || [];
-                let html = `<h3>❤️ 我的收藏庫</h3><hr>`;
+                let html = `<div class="tit">
+                                <strong>List</strong>
+                                <button id="closeModalBtn">
+                                    <img src="${exitIconUrl}" alt="exit">
+                                </button>
+                            </div>`;
+
 
                 if (favs.length === 0) {
-                    html += `<p>目前還沒有收藏單字喔！</p>`;
+                    html += `<p>No saved words yet.</p>`;
                 } else {
-                    html += `<ul style="list-style: none; padding: 0;">`;
+                    html += `<ul style="list-style: none; padding: 0; margin-bottom: 30px">`;
                     favs.forEach((f, index) => {
                         html += `
-                            <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <li class="voc_list">
                                 <span>${f.header.split('\n')[0]}</span>
-                                <button class="remove-btn" data-index="${index}" style="color: red; cursor: pointer;">移除</button>
+                                <button class="remove-btn" data-index="${index}">
+                                    <img src="${deleteIconUrl}" alt="delete">
+                                </button>
                             </li>`;
                     });
                     html += `</ul>`;
                 }
 
                 html += `
-                    <div style="margin-top: 20px; display: flex; gap: 10px;">
-                        <button id="exportCsvBtn" style="flex: 1; padding: 10px;">下載 CSV</button>
-                        <button id="ankiCsvBtn" style="flex: 1; padding: 10px;">CSV for Anki</button>
-                        <button id="closeModalBtn" style="flex: 1; padding: 10px;">關閉</button>
+                    <div class="btn-group">
+                        <button class="saveBtn downloadBtn" id="exportTxtBtn">
+                            TXT
+                            <img src="${downloadIconUrl}" alt="download">
+                        </button>
+                        <button class="saveBtn downloadBtn" id="exportCsvBtn">
+                            CSV
+                            <img src="${downloadIconUrl}" alt="download">
+                        </button>
+                        <button class="saveBtn downloadBtn" id="ankiCsvBtn" style="width: 163px;">
+                            CSV for Anki
+                            <img src="${downloadIconUrl}" alt="download">
+                        </button>
+                        
                     </div>
                 `;
                 container.innerHTML = html;
@@ -242,14 +264,36 @@ function createUI() {
         document.body.appendChild(overlay);
         renderList(); // 初始化渲染
     }
-    // 綁定按鈕
-    document.getElementById('viewFavBtn').addEventListener('click', () => {
+
+
+    // 收藏談窗綁定按鈕
+    viewFavBtn.addEventListener('click', () => {
         openFavoritesModal();
-        
+
     });
-
-
-
+    // 收藏功能的邏輯
+    saveBtn.addEventListener('click', () => {
+        // saveBtn.textContent = '已收藏';
+        chrome.storage.local.get(['favorites'], (res) => {
+            let favs = res.favorites || [];
+            // 檢查是否已存在 (避免重複)
+            if (!favs.find(item => item.header === aiResult.header)) {
+                favs.push(aiResult);
+                chrome.storage.local.set({ favorites: favs }, () => {
+                    saveBtn.textContent = '已收藏';
+                });
+                console.log('目前的收藏清單:', favs);
+            } else {
+                alert("此單字已收藏過。");
+            }
+        });
+    });
+    // 清除收藏
+    clearFavBtn.addEventListener('click', () => {
+        chrome.storage.local.remove(['favorites'], () => {
+            console.log("收藏清單已移除");
+        });
+    })
 }
 // --- 下載功能區 ---
 function exportToCSV() {
