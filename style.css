@@ -184,12 +184,14 @@ button img {
     padding: 20px;
     border-radius: 20px;
     width: 400px;
+    /* min-height: 400px; */
     max-height: 80vh;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 .voc_list {
-    max-height: 60vh;
+    max-height: 55vh;
     overflow-y: auto;
+    min-height: 100px;
     scrollbar-width: thin; /* 針對 Firefox 的簡潔滾動條 */
     margin: 15px 0 15px;
     

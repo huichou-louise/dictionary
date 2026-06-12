@@ -1,48 +1,48 @@
 {
-    "manifest_version": 3,
-    "name": "Floating Dictionary",
-    "version": "1.0",
-    "description": "一個可以固定在螢幕上的浮動字典視窗",
-    // 這裡宣告圖片路徑
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "assets/exit.png",
-                "assets/arrow.png",
-                "assets/search.png",
-                "assets/btIcon_check.png",
-                "assets/btIcon_folder.png",
-                "assets/btIcon_heart.png",
-                "assets/delete.png",
-                "assets/btIcon_download.png"
-            ],
-            "matches": [
-                "<all_urls>"
-            ]
-        }
-    ],
-    "permissions": [
-        "scripting",
-        "storage"
-    ],
-    "background": {
-        "service_worker": "background.js",
-        "type": "module"
-    },
-    "action": {
-        "default_title": "開啟/關閉字典"
-    },
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "css": [
-                "style.css"
-            ],
-            "js": [
-                "content.js"
-            ]
-        }
-    ]
+  "manifest_version": 3,
+  "name": "Floating Dictionary",
+  "version": "1.0",
+  "description": "一個可以固定在螢幕上的浮動字典視窗",
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "permissions": [
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "開啟/關閉字典"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["style.css"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/exit.png",
+        "assets/arrow.png",
+        "assets/search.png",
+        "assets/btIcon_check.png",
+        "assets/btIcon_folder.png",
+        "assets/btIcon_heart.png",
+        "assets/delete.png",
+        "assets/btIcon_download.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
