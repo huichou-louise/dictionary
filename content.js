@@ -18,16 +18,16 @@ function createUI() {
     // 視窗內容6UI
     const box = document.createElement('div');
     box.id = 'my-floating-box';
-    // -- 加上簡單的樣式，確保視窗浮動在頁面上
+    // 圖片置入區
     const exitIconUrl = chrome.runtime.getURL('assets/exit.png');
     const arrowIconUrl = chrome.runtime.getURL('assets/arrow.png');
     const searchIconUrl = chrome.runtime.getURL('assets/search.png');
-    const checkIconUrl = chrome.runtime.getURL('assets/btIcon_check.png.png');
+    const checkIconUrl = chrome.runtime.getURL('assets/btIcon_check.png');
     const folderIconUrl = chrome.runtime.getURL('assets/btIcon_folder.png');
     const heartIconUrl = chrome.runtime.getURL('assets/btIcon_heart.png');
     const deleteIconUrl = chrome.runtime.getURL('assets/delete.png');
     const downloadIconUrl = chrome.runtime.getURL('assets/btIcon_download.png');
-
+    // 
     box.innerHTML = `
         <div class="tit">
             <strong>Dictionary</strong>
@@ -73,7 +73,6 @@ function createUI() {
     const closeBtn = document.getElementById('closeBtn');
     const resultArea = document.getElementById('resultArea');
     const viewFavBtn = document.getElementById('viewFavBtn');
-    // let mockResult = null;
     let aiResult = null;
     closeBtn.addEventListener('click', () => box.remove());
 
@@ -90,6 +89,7 @@ function createUI() {
     // 搜尋功能
     const searchVocab = () => {
         const vocab = vocabInput.value.trim();
+        saveBtn.classList.remove("saved");
         saveBtn.innerHTML = `Save <img src="${heartIconUrl}" alt="save" style="opacity: 1;">`;
 
 
@@ -141,10 +141,10 @@ function createUI() {
                     aiResult = response.result;
                     console.log(aiResult);
                     resultArea.innerHTML = `
-                        <div style="font-family: sans-serif; line-height: 1.6; color: #333; text-align: left;">
-                        <!-- 翻譯區塊 -->
-                        <div style="margin-bottom: 15px; white-space: pre-line;">
-                            <strong style="color: #d35400;">${aiResult.header}   ${aiResult.speech}</strong>
+                        <div class="translate">
+                        <!-- 單字區塊 -->
+                        <div class="vocab">
+                            ${aiResult.header}   ${aiResult.speech}
                         </div>
 
                         <!-- 定義區塊 -->
@@ -159,7 +159,7 @@ function createUI() {
                         <div>
                             <strong style="color: #27ae60;">${aiResult.example_title}</strong>
                             <div style="margin-top: 5px;">
-                                ${aiResult.examples.map(ex => `<div style="margin-bottom: 10px;">${ex.replace(/\n/g, '<br>')}</div>`).join('')}
+                                ${aiResult.examples.map((ex, index) => `<div style="margin-bottom: 5px;">${index + 1}. ${ex.replace(/\n/g, '<br>')}</div>`).join('')}
                             </div>
                         </div>
                     </div>
@@ -209,17 +209,19 @@ function createUI() {
                 if (favs.length === 0) {
                     html += `<p>No saved words yet.</p>`;
                 } else {
-                    html += `<ul style="list-style: none; padding: 0; margin-bottom: 30px">`;
+                    html += `<div class="voc_list">
+                                <ul  class="voc_list_ul">
+                            `;
                     favs.forEach((f, index) => {
                         html += `
-                            <li class="voc_list">
+                            <li class="voc_list_li">
                                 <span>${f.header.split('\n')[0]}</span>
                                 <button class="remove-btn" data-index="${index}">
                                     <img src="${deleteIconUrl}" alt="delete">
                                 </button>
                             </li>`;
                     });
-                    html += `</ul>`;
+                    html += `</ul></div>`;
                 }
 
                 html += `
@@ -235,9 +237,13 @@ function createUI() {
                         <button class="saveBtn downloadBtn" id="ankiCsvBtn" style="width: 163px;">
                             CSV for Anki
                             <img src="${downloadIconUrl}" alt="download">
-                        </button>
-                        
+                        </button>    
                     </div>
+                    <button class="saveBtn clearBtn" id="clearFavBtn">
+                        Clear List
+                    </button>
+                    
+
                 `;
                 container.innerHTML = html;
 
@@ -257,6 +263,17 @@ function createUI() {
                 document.getElementById('closeModalBtn').onclick = () => overlay.remove();
                 document.getElementById('exportCsvBtn').onclick = exportToCSV;
                 document.getElementById('ankiCsvBtn').onclick = exportToAnki;
+                // 清除收藏
+                clearFavBtn.addEventListener('click', () => {
+                    chrome.storage.local.remove(['favorites'], () => {
+                        console.log("收藏清單已移除");
+                        // 強制清空頁面上的列表容器
+                        const listContainer = document.querySelector('.voc_list');
+                        if (listContainer) {
+                            listContainer.innerHTML = '<p>No saved words yet.</p>';
+                        }
+                    });
+                });
             });
         }
 
@@ -280,25 +297,25 @@ function createUI() {
             if (!favs.find(item => item.header === aiResult.header)) {
                 favs.push(aiResult);
                 chrome.storage.local.set({ favorites: favs }, () => {
-                    saveBtn.textContent = '已收藏';
+                    saveBtn.classList.add("saved");
+                    saveBtn.innerHTML = `Saved <img src="${checkIconUrl}" alt="saved">`;
+
+                    
                 });
                 console.log('目前的收藏清單:', favs);
             } else {
-                alert("此單字已收藏過。");
+                alert("This word is already saved.");
             }
         });
     });
-    // 清除收藏
-    clearFavBtn.addEventListener('click', () => {
-        chrome.storage.local.remove(['favorites'], () => {
-            console.log("收藏清單已移除");
-        });
-    })
+    
 }
 // --- 下載功能區 ---
+// CSV
 function exportToCSV() {
     chrome.storage.local.get(['favorites'], (res) => {
         const data = res.favorites || [];
+        const today = new Date().toISOString().split('T')[0];
         if (data.length === 0) return alert("沒有收藏資料可供下載");
 
         // 1. 加入 BOM (EF BB BF) 確保 Excel 能識別 UTF-8 編碼
@@ -309,25 +326,40 @@ function exportToCSV() {
 
         // 3. 逐筆處理資料
         data.forEach(item => {
-            // 輔助函式：處理字串，將雙引號轉義並以雙引號包覆
-            const escapeCSV = (str) => `"${(str || "").toString().replace(/"/g, '""')}"`;
+            // 輔助函式：移除 <br> 並替換為 \n
+            const cleanStr = (str) => {
+                if (!str) return "";
+                return str.toString().replace(/<br\s*\/?>/gi, "\n"); 
+            };
 
-            // 對應你的新結構欄位
-            const header = escapeCSV(item.header || "");
-            const speech = escapeCSV(item.speech || ""); // 新增：對應結構中的 speech
-            const definitions = escapeCSV((item.definitions || []).join('; '));
-            const usages = escapeCSV((item.usages || []).join('; '));
-            const examples = escapeCSV((item.examples || []).join('; '));
+            const header = cleanStr(item.header || "");
+            const speech = cleanStr(item.speech || "");
+            
+            // 【修改重點 1】：這裡將連接符號由 '; ' 改為 '\n'，讓內容在同一格內換行
+            const definitions = (item.definitions || []).map(cleanStr).join('\n');
+            const usages = (item.usages || []).map(cleanStr).join('\n');
+            const examples = (item.examples || []).map(cleanStr).join('\n');
 
-            // 寫入 CSV 行
-            csvContent += `${header},${speech},${definitions},${usages},${examples}\n`;
+            // 【修改重點 2】：重新設計 CSV 行的組裝邏輯
+            const rowArray = [header, speech, definitions, usages, examples];
+            
+            const processedRow = rowArray.map(field => {
+                // 如果內容包含逗號、換行符，或者原本就有雙引號，就必須加引號
+                // 並將原本的雙引號轉義為兩個雙引號 ("")
+                if (field.includes(',') || field.includes('\n') || field.includes('"')) {
+                    const escapedField = field.replace(/"/g, '""');
+                    return `"${escapedField}"`;
+                }
+                return field;
+            }).join(',');
+
+            csvContent += `${processedRow}\n`;
         });
-
         // 4. 建立並下載檔案
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "french_vocabulary.csv";
+        link.download = `fr_vocab_${today}.csv`;
         link.style.display = "none";
         document.body.appendChild(link);
         link.click();
@@ -351,22 +383,26 @@ function exportToAnki() {
 
         // 3. 逐筆處理資料
         data.forEach(item => {
-            // 輔助函式：處理字串，將雙引號轉義並以雙引號包覆
-            const escapeCSV = (str) => `"${(str || "").toString().replace(/"/g, '""')}"`;
+            // 1. 處理個別內容，將內部的 " 轉義為 "" (CSV 標準)
+            const clean = (str) => (str || "").toString().replace(/"/g, '""');
 
-            // 對應你的新結構欄位
-            const header = escapeCSV(item.header || "");
-            const speech = escapeCSV(item.speech || ""); // 新增：對應結構中的 speech
-            const definitions = escapeCSV((item.definitions || []).join('; '));
-            const usages = escapeCSV((item.usages || []).join('; '));
-            const examples = escapeCSV((item.examples || []).join('; '));
-            // 寫入 CSV 前的欄位清理邏輯
-            const clean = (str) => String(str).replace(/"/g, '""'); // 將內部的 " 變為 "" 以符合 CSV 標準
+            const header = clean(item.header || "");
+            const todayStr = clean(today);
 
-            csvContent += `${clean(header)} ${clean(speech)}\t${clean(definitions)} <br> ${clean(usages)} <br> ${clean(examples)}\t${today}\n`;
+            // 2. 將中間的第二格內容串接起來
+            // 使用 <br> 作為連接符號，不在此處加入額外引號
+            const secondCellContent = [
+                clean(item.speech || ""),
+                (item.definitions || []).map(clean).join('<br>'),
+                (item.usages || []).map(clean).join('<br>'),
+                (item.examples || []).map(clean).join('<br>')
+            ].filter(Boolean).join('<br>'); // filter(Boolean) 確保不會有空的 <br>
 
-            // 寫入 CSV 行
-            // csvContent += `${header} ${speech} \t ${definitions}${usages}${examples} \t ${today}\n`;
+            // 3. 組合三格並加上必要的 CSV 引號
+            // 如果第二格內含有 <br>，根據 CSV 規範，該格必須用 "" 包覆
+            const row = `${header},"${secondCellContent}",${todayStr}`;
+
+            csvContent += `${row}\n`;
         });
 
         // 4. 建立並下載檔案

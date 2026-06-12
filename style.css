@@ -90,21 +90,6 @@ button img {
     height: 29px;
 }
 
-
-
-#resultArea {
-    border: 1.5px #202020 solid;
-    border-radius: 15px;
-    padding: 5px 10px;
-    width: 100%;
-    font-family: 'Noto Sans Mono', monospace;
-    min-height: 75px;
-    max-height: 200px;
-    overflow-y: auto;
-    background: #f9f9f9;
-    /* font-size: 13px; */
-}
-
 .btn-group {
     display: flex !important;
     justify-content: space-between;
@@ -136,6 +121,14 @@ button img {
     transition: 0.2s;
     /* 讓變化過程平滑 */
 }
+.saved {
+    opacity: 0.7;
+    font-size: 13px;
+}
+.saved:hover {
+    opacity: 0.7;
+    font-size: 13px;
+}
 
 .viewFavBtn {
     background-color: #202020;
@@ -143,11 +136,30 @@ button img {
 }
 
 /* -------翻譯區塊---------- */
+#resultArea {
+    border: 1.5px #202020 solid;
+    border-radius: 15px;
+    padding: 5px 10px;
+    width: 100%;
+    font-family: 'Noto Sans Mono', monospace;
+    min-height: 75px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    scrollbar-width: thin; 
+    /* font-size: 13px; */
+}
 .translate {
     font-family: sans-serif;
     line-height: 1.6;
     color: #333;
     text-align: left;
+}
+.vocab {
+    color: #d35400;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 15px;
 }
 
 
@@ -163,6 +175,7 @@ button img {
     display: flex;
     justify-content: center;
     align-items: center;
+    
 }
 
 #containar {
@@ -172,20 +185,30 @@ button img {
     border-radius: 20px;
     width: 400px;
     max-height: 80vh;
-    overflow-y: auto;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
-
 .voc_list {
+    max-height: 60vh;
+    overflow-y: auto;
+    scrollbar-width: thin; /* 針對 Firefox 的簡潔滾動條 */
+    margin: 15px 0 15px;
+    
+}
+.voc_list_ul {
+    list-style: none; 
+    padding: 0; 
+    margin: 15px 0 15px;
+}
+.voc_list_li {
     display: flex !important;
     justify-content: space-between !important;
     padding: 8px 10px;
-    border-bottom: 1px solid #AEAEAE;
+    border-bottom: 1px dotted #AEAEAE;
     font-family: 'Noto Sans Mono', monospace;
     ;
 }
 
-.voc_list img {
+.voc_list_li img {
     width: 15px;
     display: block;
 }
@@ -195,4 +218,15 @@ button img {
     color: #fff;
     width: 80px;
     padding: 0 10px;
+}
+
+.clearBtn {
+    margin-top: 8px;
+    background-color: transparent;
+    border: 1.5px #202020 solid;
+    width: 100%;
+}
+.favBtn {
+    background-color: #F5F69D;
+    position: fixed;
 }
