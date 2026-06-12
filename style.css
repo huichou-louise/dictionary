@@ -33,7 +33,7 @@ button img {
     font-size: 13px;
     font-weight: 400;
     position: fixed;
-    width: 300px;
+    width: 300px !important;
     top: 20px;
     right: 20px;
     z-index: 9999;
@@ -106,12 +106,12 @@ button img {
 }
 
 .btn-group {
-    display: flex;
+    display: flex !important;
     justify-content: space-between;
 }
 
 .saveBtn {
-    display: flex;
+    display: flex !important;
     background-color: #FE7023;
     border-radius: 15px;
     font-family: 'Noto Sans Mono', monospace;
